@@ -1,0 +1,63 @@
+version: '3'
+services:
+    webserver:
+        container_name: sandbox_webserver
+        image: nginx:alpine
+        restart: on-failure
+        tty: true
+        ports:
+            - "8082:80"
+            - "443:443"
+        depends_on:
+            - app
+        volumes:
+            - ./:/var/www
+            - ./etc/infrastructure/nginx/conf.d/:/etc/nginx/conf.d/
+        networks:
+            - app-network
+    app:
+        container_name: sandbox_app
+        build: ./etc/infrastructure/php
+        volumes:
+            - .:/var/www
+        restart: on-failure
+        tty: true
+        ports:
+            - "8585:8585"
+        expose:
+            - "9000"
+        environment:
+            SERVICE_NAME: app
+            SERVICE_TAGS: dev
+        depends_on:
+            - db
+            - redis
+        networks:
+            - app-network
+    redis:
+        container_name: sandbox_redis
+        image: redis
+        restart: always
+        networks:
+            - app-network
+    db:
+        container_name: sandbox_mariadb
+        image: mariadb
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: example
+        networks:
+            - app-network
+    adminer:
+        container_name: sandbox_adminer
+        image: adminer
+        restart: always
+        ports:
+            - "8080:8080"
+        depends_on:
+            - db
+        networks:
+            - app-network
+networks:
+    app-network:
+        driver: bridge
