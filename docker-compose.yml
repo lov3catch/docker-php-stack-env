@@ -41,11 +41,11 @@ services:
         networks:
             - app-network
     db:
-        container_name: sandbox_mariadb
-        image: mariadb
+        container_name: sandbox_db
+        image: postgres
         restart: always
         environment:
-            MYSQL_ROOT_PASSWORD: example
+            POSTGRES_PASSWORD: example
         networks:
             - app-network
     adminer:
